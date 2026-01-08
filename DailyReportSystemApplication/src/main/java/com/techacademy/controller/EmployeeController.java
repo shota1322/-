@@ -23,7 +23,7 @@ public class EmployeeController {
      */
     @GetMapping
     public String index(Model model) {
-        List<Employee> employees = employeeService.findAll();
+    	List<Employee> employees = employeeService.findAllNotDeleted();
         model.addAttribute("employees", employees);
         return "employees/index";
     }

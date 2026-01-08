@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>日報 新規登録</title>
+  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+</head>
+<body>
+
+<div class="container-fluid">
+  <div class="row">
+
+    <!-- サイドバー -->
+    <nav class="col-2 bg-dark text-white min-vh-100 p-3">
+      <div class="fw-bold mb-3">日報管理システム</div>
+
+      <ul class="nav flex-column mb-3">
+        <li class="nav-item">
+          <a class="text-white text-decoration-none" th:href="@{/employees}">・従業員</a>
+        </li>
+        <li class="nav-item">
+          <a class="text-white text-decoration-none" th:href="@{/reports}">・日報</a>
+        </li>
+      </ul>
+
+      <a class="btn btn-light btn-sm" th:href="@{/logout}">ログアウト</a>
+    </nav>
+
+    <!-- メイン -->
+    <main class="col-10 p-4">
+      <h4 class="mb-3">日報 新規登録</h4>
+
+      <div class="card">
+        <div class="card-body">
+
+          <form th:action="@{/reports}" th:object="${report}" method="post">
+            <!-- CSRF -->
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <!-- 日付 -->
+            <div class="mb-3">
+              <label class="form-label">日付</label>
+              <div class="d-flex align-items-start gap-2">
+                <input type="date" class="form-control" style="max-width: 220px;"
+                       th:field="*{reportDate}">
+              </div>
+              <div class="text-danger small" th:errors="*{reportDate}"></div>
+              <div class="text-danger small" th:if="${dateDuplicateError != null}" th:text="${dateDuplicateError}"></div>
+            </div>
+
+            <!-- 氏名（表示のみ） -->
+            <div class="mb-3">
+              <label class="form-label">氏名</label>
+              <div class="form-control-plaintext" th:text="${employeeName}"></div>
+            </div>
+
+            <!-- タイトル -->
+            <div class="mb-3">
+              <label class="form-label">タイトル</label>
+              <input type="text" class="form-control" th:field="*{title}">
+              <div class="text-danger small" th:errors="*{title}"></div>
+            </div>
+
+            <!-- 内容 -->
+            <div class="mb-3">
+              <label class="form-label">内容</label>
+              <textarea class="form-control" rows="10" th:field="*{content}"></textarea>
+              <div class="text-danger small" th:errors="*{content}"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm">登録</button>
+            <a class="btn btn-primary btn-sm" th:href="@{/reports}">戻る</a>
+
+          </form>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>
+

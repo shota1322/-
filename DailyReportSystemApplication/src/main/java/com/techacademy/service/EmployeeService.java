@@ -17,108 +17,144 @@ import com.techacademy.repository.EmployeeRepository;
 @Service
 public class EmployeeService {
 
-    private final EmployeeRepository employeeRepository;
-    private final PasswordEncoder passwordEncoder;
+	private final EmployeeRepository employeeRepository;
+	private final PasswordEncoder passwordEncoder;
 
-    public EmployeeService(EmployeeRepository employeeRepository,
-                           PasswordEncoder passwordEncoder) {
-        this.employeeRepository = employeeRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+	public EmployeeService(EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder) {
+		this.employeeRepository = employeeRepository;
+		this.passwordEncoder = passwordEncoder;
+	}
 
-    /**
-     * 従業員保存処理
-     */
-    @Transactional
-    public ErrorKinds save(Employee employee) {
+	/**
+	 * 従業員保存（新規・更新共通）
+	 */
+	@Transactional
+	public ErrorKinds save(Employee employee) {
 
-        // パスワードチェック
-        ErrorKinds result = employeePasswordCheck(employee);
-        if (ErrorKinds.CHECK_OK != result) {
-            return result;
-        }
+		Employee existingEmployee = findByCode(employee.getCode());
 
-        // 社員番号重複チェック
-        if (findByCode(employee.getCode()) != null) {
-            return ErrorKinds.DUPLICATE_ERROR;
-        }
+		// 新規登録の場合のみ重複チェック
+		if (existingEmployee == null) {
 
-        employee.setDeleteFlg(false);
+			// パスワード必須チェック
+			if (employee.getPassword() == null || employee.getPassword().isEmpty()) {
+				return ErrorKinds.PASSWORD_EMPTY_ERROR;
+			}
+			// パスワード入力がある場合のみチェック＆暗号化
+			if (employee.getPassword() != null && !employee.getPassword().isEmpty()) {
+				ErrorKinds passwordResult = passwordCheck(employee);
+				if (passwordResult != ErrorKinds.CHECK_OK) {
+					return passwordResult;
+				}
+			}
+		} else {
+			// 更新時：パスワード未入力なら変更しない
+			if (employee.getPassword() == null || employee.getPassword().isEmpty()) {
+				employee.setPassword(existingEmployee.getPassword());
+			} else {
+				// パスワード入力がある場合のみチェック＆暗号化
+				if (employee.getPassword() != null && !employee.getPassword().isEmpty()) {
+					ErrorKinds passwordResult = passwordCheck(employee);
+					if (passwordResult != ErrorKinds.CHECK_OK) {
+						return passwordResult;
+					}
+				}
+			}
+		}
 
-        LocalDateTime now = LocalDateTime.now();
-        employee.setCreatedAt(now);
-        employee.setUpdatedAt(now);
+//        // パスワード入力がある場合のみチェック＆暗号化
+//        if (employee.getPassword() != null && !employee.getPassword().isEmpty()) {
+//            ErrorKinds passwordResult = passwordCheck(employee);
+//            if (passwordResult != ErrorKinds.CHECK_OK) {
+//                return passwordResult;
+//            }
 
-        employeeRepository.save(employee);
-        return ErrorKinds.SUCCESS;
-    }
+		LocalDateTime now = LocalDateTime.now();
 
-    /**
-     * 従業員削除処理（論理削除）
-     */
-    @Transactional
-    public ErrorKinds delete(String code) {
+		// 新規登録
+		if (existingEmployee == null) {
+			employee.setDeleteFlg(false);
+			employee.setCreatedAt(now);
+		} else {
+			employee.setCreatedAt(existingEmployee.getCreatedAt());
+		}
 
-        Employee employee = findByCode(code);
+		employee.setUpdatedAt(now);
 
-        // ※ 存在チェックは行わない（課題仕様）
-        employee.setDeleteFlg(true);
-        employee.setUpdatedAt(LocalDateTime.now());
+		employeeRepository.save(employee);
+		return ErrorKinds.SUCCESS;
+	}
 
-        employeeRepository.save(employee);
-        return ErrorKinds.SUCCESS;
-    }
+	/**
+	 * 従業員削除（論理削除）
+	 */
+	@Transactional
+	public void delete(String code) {
 
-    /**
-     * 従業員一覧取得
-     */
-    public List<Employee> findAll() {
-        return employeeRepository.findAll();
-    }
+		Employee employee = findByCode(code);
 
-    /**
-     * 従業員1件検索
-     */
-    public Employee findByCode(String code) {
-        Optional<Employee> option = employeeRepository.findById(code);
-        return option.orElse(null);
-    }
+		if (employee == null) {
+			return;
+		}
 
-    /**
-     * パスワードチェック
-     */
-    private ErrorKinds employeePasswordCheck(Employee employee) {
+		employee.setDeleteFlg(true);
+		employee.setUpdatedAt(LocalDateTime.now());
 
-        // 半角英数字チェック
-        if (isHalfSizeCheckError(employee)) {
-            return ErrorKinds.HALFSIZE_ERROR;
-        }
+		employeeRepository.save(employee);
+	}
 
-        // 8～16文字チェック
-        if (isOutOfRangePassword(employee)) {
-            return ErrorKinds.RANGECHECK_ERROR;
-        }
+	/**
+	 * 従業員一覧取得
+	 */
+	public List<Employee> findAll() {
+		return employeeRepository.findAll();
+	}
 
-        // パスワード暗号化
-        employee.setPassword(passwordEncoder.encode(employee.getPassword()));
+	/**
+	 * 従業員1件取得
+	 */
+	public Employee findByCode(String code) {
 
-        return ErrorKinds.CHECK_OK;
-    }
+		Optional<Employee> option = employeeRepository.findById(code);
+		return option.orElse(null);
+	}
 
-    /**
-     * 半角英数字チェック
-     */
-    private boolean isHalfSizeCheckError(Employee employee) {
-        Pattern pattern = Pattern.compile("^[A-Za-z0-9]+$");
-        Matcher matcher = pattern.matcher(employee.getPassword());
-        return !matcher.matches();
-    }
+	/**
+	 * パスワードチェック
+	 */
+	private ErrorKinds passwordCheck(Employee employee) {
 
-    /**
-     * パスワード桁数チェック
-     */
-    public boolean isOutOfRangePassword(Employee employee) {
-        int length = employee.getPassword().length();
-        return length < 8 || length > 16;
-    }
+		// 半角英数字チェック
+		if (isHalfSizeCheckError(employee.getPassword())) {
+			return ErrorKinds.HALFSIZE_ERROR;
+		}
+
+		// 桁数チェック
+		if (isOutOfRangePassword(employee.getPassword())) {
+			return ErrorKinds.RANGECHECK_ERROR;
+		}
+
+		// 暗号化
+		employee.setPassword(passwordEncoder.encode(employee.getPassword()));
+		return ErrorKinds.CHECK_OK;
+	}
+
+	/**
+	 * 半角英数字チェック
+	 */
+	private boolean isHalfSizeCheckError(String password) {
+
+		Pattern pattern = Pattern.compile("^[A-Za-z0-9]+$");
+		Matcher matcher = pattern.matcher(password);
+		return !matcher.matches();
+	}
+
+	/**
+	 * 8～16文字チェック
+	 */
+	private boolean isOutOfRangePassword(String password) {
+
+		int length = password.length();
+		return length < 8 || length > 16;
+	}
 }

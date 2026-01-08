@@ -1,94 +1,80 @@
 <!DOCTYPE html>
-<html class="h-100"
-      xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+<html class="h-100" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="common/header :: head_fragment(title=従業員詳細)"></head>
 
 <body class="h-100 overflow-hidden">
-<div class="row h-100">
+<div class="row h-100 g-0">
 
-    <!-- サイドバー -->
-    <div class="h-100 p-3 mb-2 bg-dark text-white col-sm-2">
+    <!-- サイドバー（更新画面と同じ・下まで伸ばす） -->
+    <div class="bg-dark text-white col-sm-2 p-3 min-vh-100">
         <nav th:replace="common/side :: copy"></nav>
     </div>
 
     <!-- メイン -->
     <div class="mt-3 h-100 col-sm-10">
         <div class="container-fluid p-0">
-            <h1 th:text="'code:' + ${employee.code} + ' の従業員情報詳細'"
-                class="h3 mb-3"></h1>
+            <h1 class="h3 mb-3" th:text="|code:${employee.code}の従業員情報詳細|">code: の従業員情報詳細</h1>
         </div>
 
-        <div class="mb-3 col-12 col-xxl-6">
-            <div class="col-xl-12">
-                <div class="card">
-                    <div class="card-body mb-5">
+        <div class="col-12 col-xxl-8">
+            <div class="card">
+                <div class="card-body">
 
-                        <table class="table table-striped">
-                            <tr>
-                                <th class="w-25">社員番号</th>
-                                <td th:text="${employee.code}"></td>
-                            </tr>
-                            <tr>
-                                <th>氏名</th>
-                                <td th:text="${employee.name}"></td>
-                            </tr>
-                            <tr>
-                                <th>権限</th>
-                                <td th:text="${employee.role.value}"></td>
-                            </tr>
-                            <tr>
-                                <th>登録日時</th>
-                                <td th:text="${#temporals.format(employee.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                            </tr>
-                            <tr>
-                                <th>更新日時</th>
-                                <td th:text="${#temporals.format(employee.updatedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                            </tr>
-                        </table>
+                    <table class="table">
+                        <tbody>
+                        <tr class="table-light">
+                            <th style="width: 180px;">社員番号</th>
+                            <td th:text="${employee.code}"></td>
+                        </tr>
+                        <tr>
+                            <th>氏名</th>
+                            <td th:text="${employee.name}"></td>
+                        </tr>
+                        <tr class="table-light">
+                            <th>権限</th>
+                            <!-- RoleにgetValue()があればこちら、無ければ employee.role だけにしてください -->
+                            <td th:text="${employee.role}"></td>
+                        </tr>
+                        <tr>
+                            <th>登録日時</th>
+                            <td th:text="${#temporals.format(employee.createdAt, 'yyyy-MM-dd hh:mm:ss')}"></td>
+                        </tr>
+                        <tr class="table-light">
+                            <th>更新日時</th>
+                            <td th:text="${#temporals.format(employee.updatedAt, 'yyyy-MM-dd hh:mm:ss')}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
 
-                        <!-- ボタン -->
-                        <div class="mt-5 row g-1">
+                    <!-- ボタン（青で統一） -->
+                    <div class="mt-4 d-flex gap-2">
+                        <a class="btn btn-primary"
+                           th:href="@{/employees/{code}/edit(code=${employee.code})}">
+                            更新
+                        </a>
 
-                            <!-- 更新 -->
-                            <div class="col-auto">
-                                <a th:href="@{/employees/{code}/edit(code=${employee.code})}"
-                                   class="btn btn-primary">
-                                    更新
-                                </a>
-                            </div>
+                        <form th:action="@{/employees/{code}/delete(code=${employee.code})}"
+                              method="post"
+                              th:onsubmit="return confirmDelete();">
+                            <button type="submit" class="btn btn-primary">削除</button>
+                        </form>
 
-                            <!-- 削除 -->
-                            <div class="col-auto">
-                                <form th:action="@{/employees/{code}/delete(code=${employee.code})}"
-                                      method="post">
-                                    <input type="submit" value="削除"
-                                           class="btn btn-danger">
-                                </form>
-                            </div>
-
-                            <!-- 戻る -->
-                            <div class="col-auto">
-                                <a th:href="@{/employees}" class="btn btn-secondary">
-                                    戻る
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- 削除エラー表示 -->
-                        <div class="mt-3">
-                            <span th:if="${deleteError != null}"
-                                  th:text="${deleteError}"
-                                  class="text-danger"></span>
-                        </div>
-
+                        <a class="btn btn-primary" th:href="@{/employees}">戻る</a>
                     </div>
+
                 </div>
             </div>
         </div>
-    </div>
 
+    </div>
 </div>
+
+<script>
+    function confirmDelete() {
+        return confirm('削除してよろしいですか？');
+    }
+</script>
+
 </body>
 </html>

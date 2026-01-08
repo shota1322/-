@@ -1,84 +1,124 @@
 <!DOCTYPE html>
-<html class="h-100"
-      xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="common/header :: head_fragment(title=従業員一覧)"></head>
+<head>
+	<meta charset="utf-8">
+	<title>従業員一覧</title>
 
-<body class="h-100 overflow-hidden">
+	<link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+	<script defer th:src="@{/js/bootstrap.min.js}"></script>
 
-<div class="row h-100">
+	<!-- 既存の style.css を使うなら残してOK -->
+	<link rel="stylesheet" th:href="@{/css/style.css}">
 
-    <!-- サイドバー -->
-    <div class="h-100 p-3 mb-2 bg-dark text-white col-sm-2">
-        <nav th:replace="common/side :: copy"></nav>
-    </div>
+	<!-- サイドバー統一用（style.cssに移してもOK） -->
+	<style>
+		.layout-wrap {
+			min-height: 100vh;
+		}
 
-    <!-- メインコンテンツ -->
-    <div class="mt-3 h-100 col-sm-10">
+		.sidebar {
+			width: 220px;
+			background: linear-gradient(180deg, #1f2328 0%, #2a3138 100%);
+			color: #fff;
+			padding: 18px 14px;
+		}
 
-        <div class="container-fluid p-0">
-            <h1 class="h3 mb-3">従業員 一覧</h1>
-        </div>
+		.sidebar .sysname {
+			font-weight: 700;
+			margin-bottom: 14px;
+		}
 
-        <!-- 新規登録ボタン（ADMINのみ表示） -->
-        <div class="mb-3">
-            <a th:href="@{/employees/new}"
-               class="btn btn-primary"
-               sec:authorize="hasAuthority('ADMIN')">
-                新規登録
-            </a>
-        </div>
+		.sidebar ul {
+			padding-left: 18px;
+			margin-bottom: 18px;
+		}
 
+		.sidebar a {
+			color: #fff;
+			text-decoration: underline;
+		}
 
-        <!-- 一覧テーブル -->
-        <div class="card">
-            <div class="card-body">
+		.sidebar .logout-btn {
+			background: #fff;
+			border: 0;
+			padding: 6px 10px;
+			border-radius: 4px;
+		}
 
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th>社員番号</th>
-                        <th>氏名</th>
-                        <th>権限</th>
-                        <th sec:authorize="hasAuthority('ADMIN')">操作</th>
-                    </tr>
-                    </thead>
+		.content {
+			padding: 18px 22px;
+		}
 
-                    <tbody>
-                    <tr th:each="employee : ${employees}">
-                        <td th:text="${employee.code}"></td>
-                        <td th:text="${employee.name}"></td>
-                        <td th:text="${employee.role.value}"></td>
+		/* 一覧の枠（1枚目の“カードっぽい枠”に寄せる） */
+		.box {
+			border: 1px solid #d0d0d0;
+			border-radius: 4px;
+			padding: 14px;
+			max-width: 1050px;
+		}
 
-                        <!-- 操作列（ADMINのみ） -->
-                        <td sec:authorize="hasAuthority('ADMIN')">
+		.table thead th {
+			border-bottom: 1px solid #e0e0e0;
+		}
 
-                            <!-- 削除フォーム -->
-                            <form th:action="@{/employees/{code}/delete(code=${employee.code})}"
-                                  method="post"
-                                  th:onsubmit="return confirm('削除してよろしいですか？');"
-                                  style="display:inline;">
+		.btn-blue {
+			background: #0d6efd;
+			border-color: #0d6efd;
+			color: #fff;
+		}
+	</style>
+</head>
 
-                                <button type="submit" class="btn btn-danger btn-sm">
-                                    削除
-                                </button>
+<body>
+	<div class="d-flex layout-wrap">
 
-                            </form>
+		<!-- ===== サイドバー（2枚目の形に統一） ===== -->
+		<aside class="sidebar">
+			<div class="sysname">日報管理システム</div>
 
-                        </td>
-                    </tr>
-                    </tbody>
+			<ul>
+				<li><a th:href="@{/employees}">従業員</a></li>
+				<li><a th:href="@{/reports}">日報</a></li>
+			</ul>
 
-                </table>
+			<form method="post" th:action="@{/logout}">
+				<button type="submit" class="logout-btn">ログアウト</button>
+			</form>
+		</aside>
 
-            </div>
-        </div>
+		<!-- ===== メイン ===== -->
+		<main class="content flex-grow-1">
+			<h1 class="fw-bold mb-3">従業員 一覧</h1>
 
-    </div>
-</div>
+			<div class="box">
+				<table class="table mb-2 align-middle">
+					<thead>
+						<tr>
+							<th style="width: 160px;">社員番号</th>
+							<th>氏名</th>
+							<th></th>
+						</tr>
+					</thead>
 
+					<tbody>
+						<tr th:each="employee : ${employees}">
+							<td th:text="${employee.code}">1</td>
+							<td th:text="${employee.name}">山田 太郎</td>
+							<td class="text-center">
+								<a class="btn btn-sm btn-blue" th:href="@{|/employees/${employee.code}|}">
+									詳細
+								</a>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="my-2" th:text="|（全${#lists.size(employees)}件）|">（全2件）</div>
+			<a class="btn btn-blue" th:href="@{/employees/new}">登録</a>
+		</main>
+
+	</div>
 </body>
-</html>
 
+</html>

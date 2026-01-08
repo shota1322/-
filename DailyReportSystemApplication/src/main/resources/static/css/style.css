@@ -1,0 +1,70 @@
+/* タイトル */
+.page-title {
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+/* 一覧カード */
+.employee-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-width: 1000px;
+}
+
+/* カード見出し */
+.employee-card-header {
+    padding: 10px 15px;
+    border-bottom: 1px solid #ddd;
+    font-weight: bold;
+}
+
+/* 本体 */
+.employee-card-body {
+    padding: 15px;
+}
+
+/* テーブル */
+.employee-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.employee-table th,
+.employee-table td {
+    border-top: 1px solid #ddd;
+    padding: 10px;
+}
+
+.employee-table th {
+    background: #f8f9fa;
+    text-align: left;
+}
+
+/* 詳細ボタン */
+.btn-detail {
+    background: #0d6efd;
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+/* 件数 */
+.employee-count {
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+/* 登録ボタン */
+.btn-register {
+    display: inline-block;
+    margin-top: 10px;
+    background: #0d6efd;
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+}

@@ -19,7 +19,7 @@ public class EmployeeController {
     private EmployeeService employeeService;
 
     /**
-     * 従業員一覧画面表示
+     * 従業員一覧画面
      */
     @GetMapping
     public String index(Model model) {
@@ -29,7 +29,21 @@ public class EmployeeController {
     }
 
     /**
-     * 従業員新規登録画面表示
+     * 従業員詳細画面
+     * URL: /employees/{code}
+     */
+    @GetMapping("/{code}")
+    public String detail(@PathVariable String code, Model model) {
+        Employee employee = employeeService.findByCode(code);
+        if (employee == null) {
+            return "redirect:/employees";
+        }
+        model.addAttribute("employee", employee);
+        return "employees/detail";
+    }
+
+    /**
+     * 従業員新規登録画面
      */
     @GetMapping("/new")
     public String create(Model model) {
@@ -52,7 +66,7 @@ public class EmployeeController {
             return "employees/new";
         }
 
-        // パスワード未入力チェック
+        // パスワード未入力
         if (employee.getPassword() == null || employee.getPassword().isEmpty()) {
             model.addAttribute("passwordError", "パスワードを入力してください");
             return "employees/new";
@@ -61,6 +75,47 @@ public class EmployeeController {
         if (result.hasErrors()) {
             return "employees/new";
         }
+
+        employeeService.save(employee);
+        return "redirect:/employees";
+    }
+
+    /**
+     * 従業員編集画面
+     */
+    @GetMapping("/{code}/edit")
+    public String edit(@PathVariable String code, Model model) {
+        Employee employee = employeeService.findByCode(code);
+        if (employee == null) {
+            return "redirect:/employees";
+        }
+        model.addAttribute("employee", employee);
+        return "employees/edit";
+    }
+
+    /**
+     * 従業員更新処理
+     */
+    @PostMapping("/{code}/update")
+    public String update(
+            @PathVariable String code,
+            @Valid @ModelAttribute Employee employee,
+            BindingResult result,
+            Model model) {
+
+        Employee existingEmployee = employeeService.findByCode(code);
+        if (existingEmployee == null) {
+            return "redirect:/employees";
+        }
+
+        if (result.hasErrors()) {
+            return "employees/edit";
+        }
+
+//        // パスワード未入力なら変更しない
+//        if (employee.getPassword() == null || employee.getPassword().isEmpty()) {
+//            employee.setPassword(existingEmployee.getPassword());
+//        }
 
         employeeService.save(employee);
         return "redirect:/employees";

@@ -1,29 +1,33 @@
-<nav xmlns:sec="http://www.thymeleaf.org/extras/spring-security" xmlns:th="http://www.thymeleaf.org" th:fragment="copy">
+<nav xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+     xmlns:th="http://www.thymeleaf.org"
+     th:fragment="copy">
 
-	<!-- システム名（トップへ） -->
-	<a class="text-decoration-none" th:href="@{/}">
-		<span class="text-light p-1">日報管理システム</span>
-	</a>
+  <!-- システム名 -->
+  <a class="text-decoration-none" th:href="@{/}">
+    <span class="text-light p-1">日報管理システム</span>
+  </a>
 
-	<!-- メニュー -->
-	<ul class="mt-3 mb-5">
-		<!-- 従業員一覧 -->
-		<li>
-			<a class="text-light" th:href="@{/employees}">従業員</a>
-		</li>
+  <!-- メニュー -->
+  <ul class="mt-3 mb-5">
 
-		<!-- 日報一覧 -->
-		<li>
-			<a th:href="@{/reports}">日報</a>
-		</li>
+    <!-- 管理者のみ -->
+    <li sec:authorize="hasRole('ADMIN')">
+      <a class="text-light" th:href="@{/employees}">従業員</a>
+    </li>
 
-	</ul>
+    <!-- 全ログインユーザ -->
+    <li>
+      <a class="text-light" th:href="@{/reports}">日報</a>
+    </li>
 
-	<!-- ログアウト -->
-	<form method="post" th:action="@{/logout}">
-		<div class="p-1">
-			<input type="submit" value="ログアウト" class="btn btn-light">
-		</div>
-	</form>
+  </ul>
+
+  <!-- ログアウト（POST） -->
+  <form method="post" th:action="@{/logout}">
+    <input type="hidden"
+           th:name="${_csrf.parameterName}"
+           th:value="${_csrf.token}">
+    <input type="submit" value="ログアウト" class="btn btn-light">
+  </form>
 
 </nav>

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reports")
+@SQLRestriction("delete_flg = false") // 論理削除されたデータを検索結果から除外
 public class Report {
 
     @Id
@@ -32,11 +34,14 @@ public class Report {
     @Column(name = "content", columnDefinition = "LONGTEXT", nullable = false)
     private String content;
 
-    @Column(name = "employee_code", length = 10, nullable = false)
-    private String employeeCode;
+    // ★ ここが重要：employee_code を Employee に紐付ける（保存対象）
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_code", referencedColumnName = "code", nullable = false)
+    private Employee employee;
 
-    @Column(name = "delete_flg", nullable = false)
-    private Byte deleteFlg;
+    // ★ 論理削除フラグ（TINYINT）
+    @Column(name = "delete_flg", columnDefinition = "TINYINT", nullable = false)
+    private boolean deleteFlg;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -44,15 +49,18 @@ public class Report {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // employees を参照して氏名表示するため（表示専用）
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(
-            name = "employee_code",
-            referencedColumnName = "code",
-            insertable = false,
-            updatable = false
-    )
-    private Employee employee;
+    // 作成・更新日時を自動セット（任意だけど便利）
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        this.deleteFlg = false;
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
     // ---- getter/setter ----
     public Integer getId() { return id; }
@@ -67,18 +75,15 @@ public class Report {
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
 
-    public String getEmployeeCode() { return employeeCode; }
-    public void setEmployeeCode(String employeeCode) { this.employeeCode = employeeCode; }
+    public Employee getEmployee() { return employee; }
+    public void setEmployee(Employee employee) { this.employee = employee; }
 
-    public Byte getDeleteFlg() { return deleteFlg; }
-    public void setDeleteFlg(Byte deleteFlg) { this.deleteFlg = deleteFlg; }
+    public boolean isDeleteFlg() { return deleteFlg; }
+    public void setDeleteFlg(boolean deleteFlg) { this.deleteFlg = deleteFlg; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
-
-    public Employee getEmployee() { return employee; }
-    public void setEmployee(Employee employee) { this.employee = employee; }
 }

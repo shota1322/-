@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>日報 一覧</title>
@@ -10,16 +10,13 @@
 <div class="container-fluid">
   <div class="row">
 
-    <nav class="col-2 bg-dark text-white min-vh-100 p-3">
-      <div class="fw-bold mb-3">日報管理システム</div>
-      <ul class="nav flex-column mb-3">
-        <li class="nav-item"><a class="text-white text-decoration-none" th:href="@{/employees}">・従業員</a></li>
-        <li class="nav-item"><a class="text-white text-decoration-none" th:href="@{/reports}">・日報</a></li>
-      </ul>
-      <a class="btn btn-light btn-sm" th:href="@{/logout}">ログアウト</a>
-    </nav>
+    <!-- サイドバー（ここは置き換えだけ。中身は common/side に任せる） -->
+    <div class="bg-dark text-white col-sm-2 p-3 min-vh-100">
+      <nav th:replace="common/side :: copy"></nav>
+    </div>
 
-    <main class="col-10 p-4">
+    <!-- メイン -->
+    <main class="col-sm-10 p-4">
       <h4 class="mb-3">日報 一覧</h4>
 
       <div class="card">
@@ -27,26 +24,28 @@
 
           <table class="table">
             <thead class="table-light">
-            <tr>
-              <th style="width:200px;">氏名</th>
-              <th style="width:160px;">日付</th>
-              <th>タイトル</th>
-              <th style="width:120px;"></th>
-            </tr>
+              <tr>
+                <th style="width:200px;">氏名</th>
+                <th style="width:160px;">日付</th>
+                <th>タイトル</th>
+                <th style="width:120px;"></th>
+              </tr>
             </thead>
-            <tbody>
-            <tr th:if="${reports == null || #lists.isEmpty(reports)}">
-              <td colspan="4" class="text-muted">日報がありません</td>
-            </tr>
 
-            <tr th:each="report : ${reports}">
-              <td th:text="${report.employee != null ? report.employee.name : ''}"></td>
-              <td th:text="${report.reportDate != null ? #temporals.format(report.reportDate,'yyyy-MM-dd') : ''}"></td>
-              <td th:text="${report.title}"></td>
-              <td class="text-end">
-                <a class="btn btn-primary btn-sm" th:href="@{/reports/{id}(id=${report.id})}">詳細</a>
-              </td>
-            </tr>
+            <tbody>
+              <tr th:if="${reports == null || #lists.isEmpty(reports)}">
+                <td colspan="4" class="text-muted">日報がありません</td>
+              </tr>
+
+              <tr th:each="report : ${reports}">
+                <td th:text="${report.employee != null ? report.employee.name : ''}"></td>
+                <td th:text="${report.reportDate != null ? #temporals.format(report.reportDate,'yyyy-MM-dd') : ''}"></td>
+                <td th:text="${report.title}"></td>
+                <td class="text-end">
+                  <a class="btn btn-primary btn-sm"
+                     th:href="@{/reports/{id}(id=${report.id})}">詳細</a>
+                </td>
+              </tr>
             </tbody>
           </table>
 
@@ -64,4 +63,5 @@
 
 </body>
 </html>
+
 

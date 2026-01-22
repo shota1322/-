@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>日報 新規登録</title>
@@ -10,24 +10,13 @@
 <div class="container-fluid">
   <div class="row">
 
-    <!-- サイドバー -->
-    <nav class="col-2 bg-dark text-white min-vh-100 p-3">
-      <div class="fw-bold mb-3">日報管理システム</div>
-
-      <ul class="nav flex-column mb-3">
-        <li class="nav-item">
-          <a class="text-white text-decoration-none" th:href="@{/employees}">・従業員</a>
-        </li>
-        <li class="nav-item">
-          <a class="text-white text-decoration-none" th:href="@{/reports}">・日報</a>
-        </li>
-      </ul>
-
-      <a class="btn btn-light btn-sm" th:href="@{/logout}">ログアウト</a>
-    </nav>
+    <!-- サイドバー（中身は common/side に任せる。ここは触らない） -->
+    <div class="bg-dark text-white col-sm-2 p-3 min-vh-100">
+      <nav th:replace="common/side :: copy"></nav>
+    </div>
 
     <!-- メイン -->
-    <main class="col-10 p-4">
+    <main class="col-sm-10 p-4">
       <h4 class="mb-3">日報 新規登録</h4>
 
       <div class="card">
@@ -40,12 +29,12 @@
             <!-- 日付 -->
             <div class="mb-3">
               <label class="form-label">日付</label>
-              <div class="d-flex align-items-start gap-2">
-                <input type="date" class="form-control" style="max-width: 220px;"
-                       th:field="*{reportDate}">
-              </div>
+              <input type="date" class="form-control" style="max-width: 220px;"
+                     th:field="*{reportDate}">
               <div class="text-danger small" th:errors="*{reportDate}"></div>
-              <div class="text-danger small" th:if="${dateDuplicateError != null}" th:text="${dateDuplicateError}"></div>
+              <div class="text-danger small"
+                   th:if="${dateDuplicateError != null}"
+                   th:text="${dateDuplicateError}"></div>
             </div>
 
             <!-- 氏名（表示のみ） -->
@@ -70,16 +59,14 @@
 
             <button type="submit" class="btn btn-primary btn-sm">登録</button>
             <a class="btn btn-primary btn-sm" th:href="@{/reports}">戻る</a>
-
           </form>
 
         </div>
       </div>
-
     </main>
+
   </div>
 </div>
 
 </body>
 </html>
-

@@ -15,25 +15,34 @@ public class SecurityConfig {
 
         http
             .authorizeHttpRequests(auth -> auth
+                // 認証不要
                 .requestMatchers("/login").permitAll()
                 .requestMatchers("/css/**", "/js/**").permitAll()
+
+                // ★ 従業員は管理者のみ（UserDetailが ADMIN を持っているので hasAuthority）
+                .requestMatchers("/employees/**").hasRole("ADMIN")
+
+
+                // 日報はログインしていればOK
+                .requestMatchers("/reports/**").authenticated()
+
+                // その他もログイン必須
                 .anyRequest().authenticated()
             )
             .formLogin(login -> login
                 .loginPage("/login")
-                // ログイン成功後は日報一覧へ
                 .defaultSuccessUrl("/reports", true)
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutSuccessUrl("/login")
+                .logoutUrl("/logout")                 // POST /logout
+                .logoutSuccessUrl("/login?logout")
                 .permitAll()
             );
 
         return http.build();
     }
 
-    // ★ これが無いと EmployeeService が起動時に落ちる
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

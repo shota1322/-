@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>日報 更新</title>
@@ -10,21 +10,10 @@
 <div class="container-fluid">
   <div class="row">
 
-    <!-- サイドバー -->
-    <nav class="col-2 bg-dark text-white min-vh-100 p-3">
-      <div class="fw-bold mb-3">日報管理システム</div>
-
-      <ul class="nav flex-column mb-3">
-        <li class="nav-item">
-          <a class="text-white text-decoration-none" th:href="@{/employees}">・従業員</a>
-        </li>
-        <li class="nav-item">
-          <a class="text-white text-decoration-none" th:href="@{/reports}">・日報</a>
-        </li>
-      </ul>
-
-      <a class="btn btn-light btn-sm" th:href="@{/logout}">ログアウト</a>
-    </nav>
+    <!-- サイドバー：共通部品に統一（一般には従業員リンクを出さない） -->
+    <aside class="col-2 bg-dark text-white min-vh-100 p-3">
+      <nav th:replace="common/side :: copy"></nav>
+    </aside>
 
     <!-- メイン -->
     <main class="col-10 p-4">
@@ -44,7 +33,15 @@
               <label class="form-label">日付</label>
               <input type="date" class="form-control" style="max-width:220px;"
                      th:field="*{reportDate}">
+
+              <!-- バリデーションエラー -->
               <div class="text-danger small" th:errors="*{reportDate}"></div>
+
+              <!-- ★重複チェックエラー（ControllerでdateDuplicateErrorを入れた時に表示） -->
+              <div class="text-danger small"
+                   th:if="${dateDuplicateError != null}"
+                   th:text="${dateDuplicateError}">
+              </div>
             </div>
 
             <!-- 氏名（表示のみ） -->
